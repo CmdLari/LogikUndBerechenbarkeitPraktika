@@ -19,16 +19,15 @@ occurs_check_list(Variable, []):-true.
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%% my_unify %%%%%%%%
-% unifiziert - falls möglich - zwei Terme
-my_unify(Term1, Term2):- occurs_check_checker(Term1, Term2), my_unify_checks(Term1, Term2).
-
-% DIVERSE KONTROLLPUNKTE
-my_unify_checks(Term1, Term2):- nonvar(Term1), nonvar(Term2), length_check(Term1, Term2), Term1=..[OP1|Args1], Term2=..[OP2|Args2], my_unify_unifyer(Args1, Args2).
-my_unify_checks(Term1, Term2):- var(Term1); var(Term2), Term1=Term2.
+my_unify(Term1, Term2):- unifiziere(Term1, Term2, SUB).
 
 % UNIFIZIERT TERME REKURSIV
-my_unify_unifyer([Args1Head|Args1Tail], [Args2Head|Args2Tail]):-var(Args1Head); var(Args2Head), Args2Head=Args1Head, my_unify_unifyer(Args1Tail, Args2Tail).
-my_unify_unifyer([], []):-true.
+unifiziere(Term1, Term2, Substitution):-var(Term1), var(Term2), term1\=term2, term1=term2.
+
+unifiziere(Term1, Term2, Substitution):-var(Term1), nonvar(Term2), occurs_check(Term1, Term2), Term1=Term2, Substitution=Term1.
+unifiziere(Term1, Term2, Substitution):-nonvar(Term1), var(Term2), occurs_check(Term2, Term1), Term1=Term2, Substitution=Term1.
+
+unifiziere(Term1, Term2, Substitution):-nonvar(Term1), nonvar(Term2).
 
 % HILFPRÄDIKATE
 % KONTROLLIERT LÄNGE ZWEIER TERME
@@ -38,5 +37,3 @@ length_check(Term1, Term2):-Term1=..[OP1|Args1], Term2=..[OP2|Args2], OP1==OP2, 
 occurs_check_checker(Term1, Term2):-Term2=..[OP2|Args2], occurs_check_checker_really(Term1, Args2).
 occurs_check_checker_really(Term1, [Args2Head|Args2Tail]):-occurs_check(Args2Head, Term1), occurs_check_checker_really(Term1, Args2Tail).
 occurs_check_checker_really(Term1, []):-true.
-
-%occurs_check_checker(Term1, Term2),
